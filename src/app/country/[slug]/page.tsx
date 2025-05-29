@@ -3,10 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-type Props = {
-  params: {
-    slug: string;
-  };
+type PageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 const countryData = {
@@ -1219,8 +1218,9 @@ const countryData = {
   }
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const country = countryData[params.slug as keyof typeof countryData];
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const slug = await params.then(p => p.slug);
+  const country = countryData[slug as keyof typeof countryData];
   
   if (!country) {
     return {
@@ -1241,8 +1241,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function CountryGuide({ params }: Props) {
-  const country = countryData[params.slug as keyof typeof countryData];
+export default async function CountryGuide({ params }: PageProps) {
+  const slug = await params.then(p => p.slug);
+  const country = countryData[slug as keyof typeof countryData];
 
   if (!country) {
     notFound();
@@ -1263,10 +1264,10 @@ export default function CountryGuide({ params }: Props) {
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="max-w-3xl text-white">
             <h1 className="text-6xl font-bold mb-4 text-white drop-shadow-lg">
-              {params.slug.charAt(0).toUpperCase() + params.slug.slice(1)} Travel Guide
+              {slug.charAt(0).toUpperCase() + slug.slice(1)} Travel Guide
             </h1>
             <p className="text-xl mb-6 text-white drop-shadow-md">
-              Discover the magic of {params.slug.charAt(0).toUpperCase() + params.slug.slice(1)}: from iconic landmarks to picturesque countryside, and world-renowned cuisine.
+              Discover the magic of {slug.charAt(0).toUpperCase() + slug.slice(1)}: from iconic landmarks to picturesque countryside, and world-renowned cuisine.
             </p>
             <div className="flex gap-4">
               <Link 
@@ -1310,29 +1311,7 @@ export default function CountryGuide({ params }: Props) {
               </div>
               <h3 className="font-semibold mb-2 text-white">Language</h3>
               <p className="text-gray-300">
-                {params.slug === 'france' 
-                  ? 'French' 
-                  : params.slug === 'italy' 
-                  ? 'Italian' 
-                  : params.slug === 'spain'
-                  ? 'Spanish'
-                  : params.slug === 'greece'
-                  ? 'Greek'
-                  : params.slug === 'germany'
-                  ? 'German'
-                  : params.slug === 'japan'
-                  ? 'Japanese'
-                  : params.slug === 'china'
-                  ? 'Mandarin'
-                  : params.slug === 'thailand'
-                  ? 'Thai'
-                  : params.slug === 'vietnam'
-                  ? 'Vietnamese'
-                  : params.slug === 'korea'
-                  ? 'Korean'
-                  : params.slug === 'usa'
-                  ? 'English'
-                  : 'Portuguese'}
+                {slug === 'france' ? 'French' : slug === 'italy' ? 'Italian' : slug === 'spain' ? 'Spanish' : slug === 'greece' ? 'Greek' : slug === 'germany' ? 'German' : slug === 'japan' ? 'Japanese' : slug === 'china' ? 'Mandarin' : slug === 'thailand' ? 'Thai' : slug === 'vietnam' ? 'Vietnamese' : slug === 'korea' ? 'Korean' : slug === 'usa' ? 'English' : 'Portuguese'}
               </p>
             </div>
             <div className="text-center">
@@ -1400,7 +1379,7 @@ export default function CountryGuide({ params }: Props) {
       <section id="experiences" className="py-16 bg-gray-800">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12 text-white drop-shadow-lg">
-            Unique {params.slug.charAt(0).toUpperCase() + params.slug.slice(1)} Experiences
+            Unique {slug.charAt(0).toUpperCase() + slug.slice(1)} Experiences
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {country.experiences.map((experience) => (
@@ -1431,77 +1410,77 @@ export default function CountryGuide({ params }: Props) {
             <div className="bg-white p-6 rounded-lg shadow-xl">
               <h3 className="text-xl font-semibold mb-3 text-gray-900">Transportation</h3>
               <ul className="space-y-2 text-gray-600">
-                {params.slug === 'france' ? (
+                {slug === 'france' ? (
                   <>
                     <li>• TGV trains connect major cities</li>
                     <li>• Metro systems in larger cities</li>
                     <li>• Car rental for countryside exploration</li>
                     <li>• Navigo pass for Paris transport</li>
                   </>
-                ) : params.slug === 'italy' ? (
+                ) : slug === 'italy' ? (
                   <>
                     <li>• High-speed trains between cities</li>
                     <li>• Extensive bus networks</li>
                     <li>• Car rental for rural areas</li>
                     <li>• Water taxis in Venice</li>
                   </>
-                ) : params.slug === 'spain' ? (
+                ) : slug === 'spain' ? (
                   <>
                     <li>• AVE high-speed trains</li>
                     <li>• Metro in major cities</li>
                     <li>• Car rental for regions</li>
                     <li>• Local bus networks</li>
                   </>
-                ) : params.slug === 'greece' ? (
+                ) : slug === 'greece' ? (
                   <>
                     <li>• Ferry services between islands</li>
                     <li>• Metro in Athens</li>
                     <li>• KTEL intercity buses</li>
                     <li>• Domestic flights to islands</li>
                   </>
-                ) : params.slug === 'germany' ? (
+                ) : slug === 'germany' ? (
                   <>
                     <li>• Deutsche Bahn rail network</li>
                     <li>• Efficient public transport</li>
                     <li>• Autobahn for driving</li>
                     <li>• Regional transport passes</li>
                   </>
-                ) : params.slug === 'japan' ? (
+                ) : slug === 'japan' ? (
                   <>
                     <li>• JR Rail Pass for intercity travel</li>
                     <li>• Efficient metro systems</li>
                     <li>• Shinkansen bullet trains</li>
                     <li>• IC cards for local transport</li>
                   </>
-                ) : params.slug === 'china' ? (
+                ) : slug === 'china' ? (
                   <>
                     <li>• High-speed rail network</li>
                     <li>• Metro systems in major cities</li>
                     <li>• DiDi ride-hailing app</li>
                     <li>• Domestic flights for long distances</li>
                   </>
-                ) : params.slug === 'thailand' ? (
+                ) : slug === 'thailand' ? (
                   <>
                     <li>• BTS Skytrain in Bangkok</li>
                     <li>• Tuk-tuks for short trips</li>
                     <li>• Long-distance buses</li>
                     <li>• Island ferries</li>
                   </>
-                ) : params.slug === 'vietnam' ? (
+                ) : slug === 'vietnam' ? (
                   <>
                     <li>• Motorbike taxis (Grab)</li>
                     <li>• Overnight trains</li>
                     <li>• Local buses</li>
                     <li>• Domestic flights</li>
                   </>
-                ) : params.slug === 'korea' ? (
+                ) : slug === 'korea' ? (
                   <>
                     <li>• Efficient metro system</li>
                     <li>• KTX high-speed trains</li>
                     <li>• Local buses</li>
                     <li>• T-money card for transport</li>
                   </>
-                ) : params.slug === 'usa' ? (
+                ) : slug === 'usa' ? (
                   <>
                     <li>• Domestic flights for long distances</li>
                     <li>• Metro in major cities</li>
@@ -1521,77 +1500,77 @@ export default function CountryGuide({ params }: Props) {
             <div className="bg-white p-6 rounded-lg shadow-xl">
               <h3 className="text-xl font-semibold mb-3 text-gray-900">Cultural Tips</h3>
               <ul className="space-y-2 text-gray-600">
-                {params.slug === 'france' ? (
+                {slug === 'france' ? (
                   <>
                     <li>• Greet with "Bonjour" when entering shops</li>
                     <li>• Lunch: 12-2 PM, Dinner: 7:30-10 PM</li>
                     <li>• Many shops closed on Sundays</li>
                     <li>• Learn basic French phrases</li>
                   </>
-                ) : params.slug === 'italy' ? (
+                ) : slug === 'italy' ? (
                   <>
                     <li>• Greet with "Ciao" or "Buongiorno"</li>
                     <li>• Lunch: 1-3 PM, Dinner: 8-11 PM</li>
                     <li>• Afternoon siesta is common</li>
                     <li>• Learn basic Italian phrases</li>
                   </>
-                ) : params.slug === 'spain' ? (
+                ) : slug === 'spain' ? (
                   <>
                     <li>• Greet with "Hola" or "Buenos días"</li>
                     <li>• Late dining culture (9-11 PM)</li>
                     <li>• Siesta time respected</li>
                     <li>• Learn basic Spanish phrases</li>
                   </>
-                ) : params.slug === 'greece' ? (
+                ) : slug === 'greece' ? (
                   <>
                     <li>• Greet with "Yassou"</li>
                     <li>• Lunch: 2-4 PM, Dinner: 9-11 PM</li>
                     <li>• Afternoon rest common in summer</li>
                     <li>• Learn basic Greek phrases</li>
                   </>
-                ) : params.slug === 'germany' ? (
+                ) : slug === 'germany' ? (
                   <>
                     <li>• Greet with "Guten Tag"</li>
                     <li>• Punctuality is important</li>
                     <li>• Most shops closed on Sundays</li>
                     <li>• Learn basic German phrases</li>
                   </>
-                ) : params.slug === 'japan' ? (
+                ) : slug === 'japan' ? (
                   <>
                     <li>• Bow when greeting</li>
                     <li>• Remove shoes before entering homes</li>
                     <li>• Use two hands when giving/receiving</li>
                     <li>• Learn basic Japanese phrases</li>
                   </>
-                ) : params.slug === 'china' ? (
+                ) : slug === 'china' ? (
                   <>
                     <li>• Respect personal space</li>
                     <li>• Learn basic Mandarin phrases</li>
                     <li>• Use chopsticks properly</li>
                     <li>• Accept business cards with both hands</li>
                   </>
-                ) : params.slug === 'thailand' ? (
+                ) : slug === 'thailand' ? (
                   <>
                     <li>• Greet with a wai (bow)</li>
                     <li>• Dress modestly at temples</li>
                     <li>• Remove shoes indoors</li>
                     <li>• Don't touch people's heads</li>
                   </>
-                ) : params.slug === 'vietnam' ? (
+                ) : slug === 'vietnam' ? (
                   <>
                     <li>• Use both hands when passing items</li>
                     <li>• Remove shoes before entering homes</li>
                     <li>• Respect elder people</li>
                     <li>• Learn basic Vietnamese phrases</li>
                   </>
-                ) : params.slug === 'korea' ? (
+                ) : slug === 'korea' ? (
                   <>
                     <li>• Tipping is expected (15-20%)</li>
                     <li>• Casual dress is acceptable</li>
                     <li>• Greet with "Hi" or "Hello"</li>
                     <li>• Respect personal space</li>
                   </>
-                ) : params.slug === 'usa' ? (
+                ) : slug === 'usa' ? (
                   <>
                     <li>• Greet with "Olá" (hello)</li>
                     <li>• Casual and beach attire common</li>
@@ -1611,77 +1590,77 @@ export default function CountryGuide({ params }: Props) {
             <div className="bg-white p-6 rounded-lg shadow-xl">
               <h3 className="text-xl font-semibold mb-3 text-gray-900">Money Saving</h3>
               <ul className="space-y-2 text-gray-600">
-                {params.slug === 'france' ? (
+                {slug === 'france' ? (
                   <>
                     <li>• Museum Pass for multiple entries</li>
                     <li>• Free first Sunday at museums</li>
                     <li>• Prix fixe lunch menus</li>
                     <li>• Book trains in advance</li>
                   </>
-                ) : params.slug === 'italy' ? (
+                ) : slug === 'italy' ? (
                   <>
                     <li>• Roma Pass for attractions</li>
                     <li>• Free church visits</li>
                     <li>• Lunch at local trattorias</li>
                     <li>• Regional train passes</li>
                   </>
-                ) : params.slug === 'spain' ? (
+                ) : slug === 'spain' ? (
                   <>
                     <li>• City tourist cards</li>
                     <li>• Menu del día for lunch</li>
                     <li>• Free museum hours</li>
                     <li>• Book AVE trains early</li>
                   </>
-                ) : params.slug === 'greece' ? (
+                ) : slug === 'greece' ? (
                   <>
                     <li>• Museum pass in Athens</li>
                     <li>• Visit during shoulder season</li>
                     <li>• Ferry passes for island hopping</li>
                     <li>• Eat at local tavernas</li>
                   </>
-                ) : params.slug === 'germany' ? (
+                ) : slug === 'germany' ? (
                   <>
                     <li>• City tourist cards</li>
                     <li>• Deutsche Bahn savings fares</li>
                     <li>• Free walking tours</li>
                     <li>• Student discounts</li>
                   </>
-                ) : params.slug === 'japan' ? (
+                ) : slug === 'japan' ? (
                   <>
                     <li>• JR Pass for long-distance travel</li>
                     <li>• Eat at local ramen shops</li>
                     <li>• Stay in capsule hotels</li>
                     <li>• Visit temples for free</li>
                   </>
-                ) : params.slug === 'china' ? (
+                ) : slug === 'china' ? (
                   <>
                     <li>• Use WeChat Pay/Alipay</li>
                     <li>• Book trains in advance</li>
                     <li>• Eat at local restaurants</li>
                     <li>• Use metro for city travel</li>
                   </>
-                ) : params.slug === 'thailand' ? (
+                ) : slug === 'thailand' ? (
                   <>
                     <li>• Stay in guesthouses</li>
                     <li>• Eat at street food stalls</li>
                     <li>• Use local transport</li>
                     <li>• Visit temples for free</li>
                   </>
-                ) : params.slug === 'vietnam' ? (
+                ) : slug === 'vietnam' ? (
                   <>
                     <li>• Stay in hostels/guesthouses</li>
                     <li>• Eat street food</li>
                     <li>• Use sleeper trains</li>
                     <li>• Bargain at markets</li>
                   </>
-                ) : params.slug === 'korea' ? (
+                ) : slug === 'korea' ? (
                   <>
                     <li>• City tourist passes</li>
                     <li>• National Park annual pass</li>
                     <li>• Happy hour specials</li>
                     <li>• Book flights in advance</li>
                   </>
-                ) : params.slug === 'usa' ? (
+                ) : slug === 'usa' ? (
                   <>
                     <li>• Travel in off-season</li>
                     <li>• Eat at local restaurants</li>
@@ -1707,7 +1686,7 @@ export default function CountryGuide({ params }: Props) {
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-4xl font-bold mb-4 text-white drop-shadow-lg">
-              Get {params.slug.charAt(0).toUpperCase() + params.slug.slice(1)} Travel Updates
+              Get {slug.charAt(0).toUpperCase() + slug.slice(1)} Travel Updates
             </h2>
             <p className="text-xl mb-8 text-gray-300">
               Subscribe for insider tips, seasonal guides, and special offers.
